@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Estratégias de Prompt: NotebookLM (Full)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+       .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+           .chart-container { height: 350px; }
+        }
+       .prompt-card {
+            transition: all 0.2s ease-in-out;
+        }
+       .prompt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+       .category-btn.active {
+            background-color: #d97706;
+            color: white;
+            border-color: #d97706;
+        }
+       .copy-notification {
+            animation: fadeInOut 2s ease-in-out forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+       .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #d97706;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                        <i class="fa-solid fa-book-open-reader text-amber-600 mr-3"></i>NotebookLM Prompt Master
+                    </h1>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl">
+                        Biblioteca de prompts de alta fidelidade para pesquisa acadêmica e produção de áudio. Todos os prompts estão em sua versão completa e original em inglês.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                        v3.2 Fix
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-12">
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-xl font-bold text-gray-800 border-l-4 border-amber-500 pl-3">
+                    Estratégia de Engenharia
+                </h2>
+                <p class="text-gray-600 leading-relaxed text-sm">
+                    Para obter resultados profissionais no NotebookLM, prompts simples não funcionam. Esta biblioteca contém as instruções de "Roleplay" e "Restrição Negativa" detalhadas no relatório de pesquisa.
+                </p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <h4 class="font-semibold text-blue-800 text-sm mb-2"><i class="fa-solid fa-circle-info mr-2"></i>Dica Pro</h4>
+                    <p class="text-xs text-blue-700">
+                        Copie o prompt inteiro. Não tente traduzi-lo para o português antes de enviar, pois a "tokenização" em inglês garante que o modelo siga as instruções lógicas (como criar tabelas Markdown) com maior precisão.
+                    </p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Tipologia dos Prompts</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="ai-generator" class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-6 md:p-8 shadow-sm relative overflow-hidden">
+             <div class="absolute top-0 right-0 -mt-4 -mr-4 text-amber-100 opacity-50 transform rotate-12">
+                <i class="fa-solid fa-wand-magic-sparkles text-9xl"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-white p-2 rounded-lg shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-600 text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Gerador de Prompts Personalizado (IA)</h2>
+                </div>
+                <p class="text-gray-700 mb-6 max-w-3xl text-sm">
+                    Descreva seu objetivo em português. A IA criará um prompt estruturado em inglês com personas e regras.
+                </p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <textarea id="userIntent" rows="3" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-3 text-sm"
+                            placeholder="Ex: Quero analisar contratos jurídicos buscando cláusulas de risco..."></textarea>
+                        <button id="generateBtn" class="bg-amber-600 text-white px-6 py-2.5 rounded-lg hover:bg-amber-700 transition-colors font-medium flex items-center gap-2 text-sm">
+                            <span>Gerar Prompt Mágico ✨</span>
+                            <div id="loadingSpinner" class="loader hidden"></div>
+                        </button>
+                        <p id="errorMsg" class="text-red-600 text-xs hidden"></p>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <div id="resultContainer" class="hidden h-full bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col">
+                            <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center rounded-t-lg">
+                                <span class="text-xs font-semibold text-gray-500 uppercase">Prompt Gerado</span>
+                                <button onclick="copyGeneratedPrompt()" class="text-gray-400 hover:text-amber-600 transition-colors">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="p-4 flex-grow overflow-y-auto max-h-48">
+                                <p id="generatedText" class="text-xs text-gray-800 font-mono whitespace-pre-wrap"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="library-section">
+            <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Biblioteca de Prompts</h2>
+                    <p class="text-gray-500 text-sm mt-1">Acervo completo fiel ao relatório de pesquisa.</p>
+                </div>
+                <div class="relative w-full md:w-64">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </span>
+                    <input type="text" id="searchInput" 
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white placeholder-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 sm:text-sm" 
+                        placeholder="Buscar prompts...">
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-8" id="categoryFilters">
+                <button class="category-btn active px-4 py-2 rounded-lg border border-transparent text-sm font-medium transition-colors" data-category="all">Todos</button>
+                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="audio"><i class="fa-solid fa-podcast mr-2"></i>Audio (Deep Dive)</button>
+                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="analysis"><i class="fa-solid fa-glasses mr-2"></i>Fichamento & Análise</button>
+                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="study"><i class="fa-solid fa-graduation-cap mr-2"></i>Estudo Ativo</button>
+            </div>
+
+            <div id="promptsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+                <!-- Grid items generated by JS -->
+            </div>
+            
+            <div id="emptyState" class="hidden text-center py-12">
+                <p class="text-gray-500">Nenhum prompt encontrado.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="copyToast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg hidden z-50 flex items-center">
+        <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
+        <span>Prompt Completo Copiado!</span>
+    </div>
+
+    <script>
+        // --- Gemini API ---
+        const apiKey = ""; 
+        const generateBtn = document.getElementById('generateBtn');
+        const userIntentInput = document.getElementById('userIntent');
+        const resultContainer = document.getElementById('resultContainer');
+        const generatedText = document.getElementById('generatedText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMsg = document.getElementById('errorMsg');
+
+        generateBtn.addEventListener('click', async () => {
+            const intent = userIntentInput.value.trim();
+            if (!intent) {
+                errorMsg.textContent = "Por favor, descreva seu objetivo primeiro.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            errorMsg.classList.add('hidden');
+            generateBtn.disabled = true;
+            generateBtn.querySelector('span').textContent = "Gerando...";
+            loadingSpinner.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+
+            const systemPrompt = "You are an expert prompt engineer for Google's NotebookLM. Create a highly detailed, structured prompt in ENGLISH based on the user's intent. Include roles, constraints, and output formats.";
+            const userPrompt = `Create a NotebookLM prompt for: ${intent}`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro ao gerar texto.";
+                
+                generatedText.textContent = aiText;
+                resultContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                errorMsg.textContent = "Erro ao gerar prompt. Tente novamente.";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.querySelector('span').textContent = "Gerar Prompt Mágico ✨";
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        function copyGeneratedPrompt() { copyToClipboard(generatedText.textContent); }
+
+        // --- FULL TEXT PROMPTS DATA ---
+        const promptsData = [
+            // --- AUDIO & PODCAST ---
+            {
+                id: 1,
+                title: "The Job Interview Simulation",
+                category: "audio",
+                description: "Simula uma entrevista de emprego difícil. O Host 1 é o candidato (hesitante) e o Host 2 é o gerente que corrige e ensina o método STAR.",
+                prompt: "Focus on a job interview simulation.\n\nContext: Use the uploaded documents (resumes, job descriptions, or technical guides) to act as the knowledge base.\n\nRoleplay Instructions:\n* Host 1 (Candidate): Acts as the candidate answering tentatively. Occasionally gets an answer wrong or lacks structured reasoning.\n* Host 2 (Hiring Manager): Acts as the seasoned hiring manager or coach. Interrupts to correct Host 1, explaining the 'STAR' method (Situation, Task, Action, Result) and providing the ideal technical answer based on the source documents.\n\nGoal: Provide a simulated feedback loop so the listener learns from the candidate's mistakes.",
+                tags: ["entrevista", "carreira", "roleplay"]
+            },
+            {
+                id: 2,
+                title: "The Skeptical Journalist (Debate)",
+                category: "audio",
+                description: "Cria um debate acalorado onde o Host 2 ataca a tese do texto para testar sua robustez.",
+                prompt: "Simulate a heated debate.\n* Host 1 (The Author): Represents the perspective of the uploaded text. Defends the thesis passionately using facts from the source.\n* Host 2 (The Skeptical Journalist): Acts as an investigative journalist who questions every claim. Ask about evidence, potential biases, blind spots, and alternative explanations.\n\nConstraint: The journalist must be relentless but fair. The author must respond only using facts present in the source documents. Do not hallucinate external data.\n\nGoal: To expose any logical fallacies or gaps in the provided text.",
+                tags: ["debate", "crítica", "jornalismo"]
+            },
+            {
+                id: 3,
+                title: "The Academic Review (Neutral Tone)",
+                category: "audio",
+                description: "Remove o estilo 'podcast animado' padrão, forçando um tom acadêmico, neutro e preciso.",
+                prompt: "You are the host of 'The Academic Review,' a podcast that provides clear, structured, and neutral overviews of complex papers. Your tone is that of a grounded, informed, and dispassionate colleague. Your primary goal is to inform, not to entertain.\n\nGuidelines:\n* Tone: Maintain a measured, even delivery. Avoid melodrama, excessive enthusiasm, or conversational filler words like 'mind-blowing' or 'whoa'.\n* Language: Use precise, academic language. Prioritize phrases like 'the author examines,' 'the thesis contends,' 'the data suggests.'\n* Structure: Begin with the research question, move methodically to methodology, then results, and finally conclusions.\n* Neutrality: Frame critiques objectively. Instead of saying 'this is bad,' say 'This approach does not account for X'.",
+                tags: ["acadêmico", "sério", "ciência"]
+            },
+            {
+                id: 4,
+                title: "Deep Dive After Dark (Informal/Raw)",
+                category: "audio",
+                description: "Transforma temas áridos em uma conversa de bar, usando gírias e informalidade radical.",
+                prompt: "This episode is for a mature audience. The hosts are encouraged to speak freely, use slang, and be irreverent. The tone should be informal, conversational, and raw.\n* Instruction: Do not censor language if it fits the flow. Use strong expressions to emphasize frustration with complex topics.\n* Analogy: The episode should feel like a heated discussion between friends at a bar, complaining about the complexity of the text while trying to understand it.\n* Keywords: Use phrases like 'cut the crap', 'let's be real', 'messy'.\n* Goal: Make this dry source material entertaining through brutal honesty.",
+                tags: ["informal", "engajamento", "humor"]
+            },
+            {
+                id: 5,
+                title: "Quiz Show Gamification",
+                category: "audio",
+                description: "Transforma o áudio em um Quiz Show interativo para revisão de matéria.",
+                prompt: "You're hosting a fun quiz show with two hosts.\n* Host 1 (Quizmaster): Quizzes Host 2 on concepts from my uploaded lecture slides. Include a mix of multiple choice and true/false questions.\n* Host 2 (Contestant): Attempts to answer. Occasionally gets an answer wrong to simulate common misconceptions.\n* Correction Mechanism: When Host 2 gets it wrong, Host 1 must step in to explain the correct answer in a clear and concise way, citing the specific slide or page.\n* Ending: Share the final score and a brief summary of the key topics covered.",
+                tags: ["estudo", "quiz", "ativo"]
+            },
+
+            // --- FICHAMENTO & ANALYSIS ---
+            {
+                id: 6,
+                title: "The Gap Hunter (Caçador de Lacunas)",
+                category: "analysis",
+                description: "Identifica falhas metodológicas e teóricas nos textos. Essencial para teses.",
+                prompt: "You are an expert research mentor specializing in this field. Analyze the provided collection of papers. Identify at least three categories of research gaps:\n(a) Methodological (weaknesses in how studies were conducted)\n(b) Theoretical (concepts not fully explored or defined)\n(c) Empirical/Contextual (populations or contexts ignored)\n\nFor each category, create a Markdown table with the following columns:\n1. Gap Description: A one-sentence description of what is missing.\n2. Evidence of Deficiency: Cite a specific paper that highlights this limitation.\n3. Suggested Research Question: Propose a novel question that could address this gap.",
+                tags: ["pesquisa", "lacunas", "doutorado"]
+            },
+            {
+                id: 7,
+                title: "The Contradiction Finder",
+                category: "analysis",
+                description: "Mapeia onde os autores discordam entre si, criando uma matriz de conflitos.",
+                prompt: "From the provided papers, identify major contradictions or conflicting findings among the authors. Do not smooth over the differences; highlight them.\n\nPresent the output as a structured list:\n* Contradiction Subject:\n* Viewpoint A: Specific claim/result from Paper X (with citation).\n* Viewpoint B: Opposing claim/result from Paper Y (with citation).\n* Root Cause Analysis: Suggest possible reasons for the disagreement (e.g., differences in methodology, sample demographics, or theoretical frameworks).\n* Resolution Path: What kind of further evidence would resolve this conflict?",
+                tags: ["síntese", "comparação", "contradição"]
+            },
+            {
+                id: 8,
+                title: "Methodology Deep Dive",
+                category: "analysis",
+                description: "Analisa a robustez metodológica, extraindo vieses e limitações recorrentes.",
+                prompt: "Analyze the methodological weaknesses and recurring challenges in the field based on these sources. Extract 4–6 common issues (e.g., small sample sizes, weak controls, measurement biases, reproducibility concerns).\n\nFor each issue, explain:\n1. Recurrence: How it appears in multiple papers (cite sources).\n2. Impact: Why it matters for validity or generalizability.\n3. Solution: What best practices could address it in future research?",
+                tags: ["metodologia", "crítica", "ciência"]
+            },
+            {
+                id: 9,
+                title: "The Dialectical Lens",
+                category: "analysis",
+                description: "Constrói um debate entre dois acadêmicos imaginários sobre o texto.",
+                prompt: "From this text, construct a debate between two imaginary scholars who interpret this concept/argument in opposing ways.\n* Scholar A (Proponent): Supports the text's central thesis.\n* Scholar B (Critic): Challenges the thesis based on alternative interpretations or external logic.\n\nRequirement: What specific evidence/quotes from the book would each scholar use to support their view? List at least 3 citations for each side.",
+                tags: ["dialética", "filosofia", "debate"]
+            },
+            {
+                id: 10,
+                title: "Cultural Mirror",
+                category: "analysis",
+                description: "Recontextualiza a ideia central em um cenário cultural ou histórico diferente.",
+                prompt: "How would this idea [Insert Idea from text] look in a completely different cultural, historical, or philosophical context?\n* Challenge: Rewrite the core argument from the viewpoint of a specific alternative culture/philosophy.\n* Question: Would the argument still hold? Where would it fail?",
+                tags: ["sociologia", "criatividade", "cenários"]
+            },
+
+            // --- STUDY & SYNTHESIS ---
+            {
+                id: 11,
+                title: "The 5 Essential Questions",
+                category: "study",
+                description: "Gera as 5 perguntas cruciais que resumem todo o material, e depois as responde.",
+                prompt: "Analyze all inputs and generate 5 essential questions that, when answered, capture the main points and core meaning of all inputs.\n\nCriteria for Questions:\na. Address the central theme or argument.\nb. Identify key supporting ideas.\nc. Highlight important facts or evidence.\nd. Reveal the author's purpose or perspective.\ne. Explore any significant implications or conclusions.\n\nOutput: After listing the questions, answer all of them one-by-one in detail using the source text.",
+                tags: ["resumo", "estudo", "provas"]
+            },
+            {
+                id: 12,
+                title: "Feynman Technique (Simplification)",
+                category: "study",
+                description: "Explica conceitos complexos como se fosse para uma criança de 12 anos.",
+                prompt: "Analyze [Concept X] from the sources using the Feynman Technique:\n1. Simple Explanation: Explain the concept in simple terms accessible to a 12-year-old.\n2. Gap Identification: Identify explicit knowledge gaps in the source text (what is not explained?).\n3. Analogies: Connect concepts through real-world analogies.\n4. Application: Create a real-world example for each key finding found in the text.",
+                tags: ["aprendizado", "simplificação", "feynman"]
+            },
+            {
+                id: 13,
+                title: "Anki Flashcards Generator",
+                category: "study",
+                description: "Cria flashcards formatados prontos para importação no Anki.",
+                prompt: "Thoroughly go through the provided sources and create comprehensive Anki flashcards.\nFormat:\nFront: [Question or Concept]\nBack:\n\nScaffold:\nQ: What is the primary function of the mitochondria described in Chapter 3? ; A: Energy production via ATP synthesis.\n\nInstruction: Divide the output by chapter or topic. Ensure coverage of all bolded terms in the source text.",
+                tags: ["anki", "flashcards", "memorização"]
+            },
+            {
+                id: 14,
+                title: "Content Strategy & SEO",
+                category: "study",
+                description: "Analisa concorrentes e cria estratégia de conteúdo baseada no texto.",
+                prompt: "Act as a content strategy expert. Based on the uploaded competitor articles, create a full analysis with the following structure:\n1. Quick Summary: 3 bullet points of the most important ideas.\n2. Target Audience Analysis: Who is this content written for? (e.g., beginners vs experts).\n3. Search Intent: When people search for this topic, what questions are they trying to answer?\n4. Content Gap: List 5 sub-topics that these competitors are missing but are relevant to the main theme.",
+                tags: ["marketing", "seo", "business"]
+            }
+        ];
+
+        // --- RENDER LOGIC ---
+        let currentCategory = 'all';
+        let searchQuery = '';
+        const grid = document.getElementById('promptsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filters = document.getElementById('categoryFilters');
+        const emptyState = document.getElementById('emptyState');
+        const toast = document.getElementById('copyToast');
+
+        function renderPrompts() {
+            grid.innerHTML = '';
+            const filtered = promptsData.filter(item => {
+                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(item => {
+                    grid.appendChild(createCard(item));
+                });
+            }
+        }
+
+        function createCard(item) {
+            const div = document.createElement('div');
+            div.className = 'prompt-card bg-white rounded-xl p-6 border border-gray-200 flex flex-col h-full';
+            
+            let badgeClass = 'bg-gray-100 text-gray-800';
+            let icon = 'fa-file-text';
+            if(item.category === 'audio') { badgeClass = 'bg-purple-100 text-purple-800'; icon = 'fa-headphones'; }
+            if(item.category === 'analysis') { badgeClass = 'bg-blue-100 text-blue-800'; icon = 'fa-brain'; }
+            if(item.category === 'study') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = 'fa-graduation-cap'; }
+
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass} capitalize">
+                        <i class="fa-solid ${icon} mr-1.5"></i> ${item.category}
+                    </span>
+                    <button onclick="copyToClipboard('${escapeJs(item.prompt)}')" class="text-gray-400 hover:text-amber-600 transition-colors" title="Copiar Prompt Completo">
+                        <i class="fa-regular fa-copy text-lg"></i>
+                    </button>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">${item.title}</h3>
+                <p class="text-sm text-gray-600 mb-4 h-12 overflow-hidden text-ellipsis">${item.description}</p>
+                
+                <div class="mt-auto">
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 mb-4 relative group cursor-pointer" onclick="copyToClipboard('${escapeJs(item.prompt)}')">
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="text-xs bg-gray-800 text-white px-2 py-1 rounded">Copiar</span>
+                        </div>
+                        <p class="text-xs text-gray-500 font-mono italic leading-relaxed line-clamp-4 group-hover:text-gray-700 transition-colors">
+                            "${item.prompt}"
+                        </p>
+                    </div>
+                    <button onclick="copyToClipboard('${escapeJs(item.prompt)}')" class="w-full mt-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-all flex items-center justify-center shadow-sm">
+                        <i class="fa-regular fa-copy mr-2"></i> Copiar Prompt Completo
+                    </button>
+                </div>
+            `;
+            return div;
+        }
+
+        // --- Standard Logic (Listeners, Chart, Utils) ---
+        function setupEventListeners() {
+            filters.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    filters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    currentCategory = e.currentTarget.dataset.category;
+                    renderPrompts();
+                });
+            });
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim();
+                renderPrompts();
+            });
+        }
+
+        // Fixed Copy Function for iFrame Support
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                toast.classList.remove('hidden');
+                toast.classList.add('copy-notification');
+                setTimeout(() => {
+                    toast.classList.remove('copy-notification');
+                    toast.classList.add('hidden');
+                }, 2000);
+            } catch (err) {
+                console.error('Falha ao copiar:', err);
+                alert('Não foi possível copiar automaticamente.');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        function escapeJs(str) {
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('usageChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Fichamento & Análise', 'Estudo Ativo', 'Audio (Podcast)', 'Outros'],
+                    datasets: [{
+                        data: [35, 30, 25, 10], // Fixed numeric data
+                        backgroundColor: ['#93C5FD', '#FCD34D', '#C4B5FD', '#E5E7EB'], // Fixed colors
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart();
+            renderPrompts();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>
