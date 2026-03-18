@@ -3,512 +3,1072 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia de Estratégias de Prompt: NotebookLM (Full)</title>
+    <title>Positive Co. — Biblioteca de Prompts</title>
+    <meta name="description" content="Biblioteca curada de prompts para IA da Positive Company. Organize, busque e reutilize prompts para ChatGPT, Claude, Gemini e mais.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pco': {
+                            'green': '#BDE9C9',
+                            'green-dark': '#7EC794',
+                            'lilac': '#C5B4E3',
+                            'lilac-dark': '#9B85C9',
+                            'blue': '#B9D9EB',
+                            'blue-dark': '#8BB8D4',
+                            'bg': '#FAF8F4',
+                            'bg-card': '#FFFFFF',
+                            'text': '#1A1A1A',
+                            'text-muted': '#6B7280',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #FAF8F4;
+            color: #1A1A1A;
         }
-       .chart-container {
+
+        .gradient-header {
+            background: linear-gradient(135deg, #BDE9C9 0%, #C5B4E3 50%, #B9D9EB 100%);
+        }
+
+        .card-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12);
+        }
+
+        .tag-pill {
+            transition: all 0.2s ease;
+        }
+        .tag-pill:hover {
+            transform: scale(1.05);
+        }
+        .tag-pill.active {
+            background-color: #C5B4E3;
+            color: #1A1A1A;
+            border-color: #9B85C9;
+        }
+
+        .model-btn.active {
+            background-color: #BDE9C9;
+            color: #1A1A1A;
+            border-color: #7EC794;
+            font-weight: 600;
+        }
+
+        .prompt-content {
+            max-height: 160px;
+            overflow: hidden;
             position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
         }
-        @media (min-width: 768px) {
-           .chart-container { height: 350px; }
+        .prompt-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: linear-gradient(transparent, white);
+            pointer-events: none;
         }
-       .prompt-card {
-            transition: all 0.2s ease-in-out;
+
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.5);
         }
-       .prompt-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        .copy-toast {
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
         }
-       .category-btn.active {
-            background-color: #d97706;
-            color: white;
-            border-color: #d97706;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-       .copy-notification {
-            animation: fadeInOut 2s ease-in-out forwards;
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-8px); }
         }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(189, 233, 201, 0.4);
         }
-       .loader {
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #d97706;
-            width: 20px;
-            height: 20px;
-            -webkit-animation: spin 1s linear infinite;
-            animation: spin 1s linear infinite;
+
+        .logo-text {
+            background: linear-gradient(135deg, #7EC794, #9B85C9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .scroll-top {
+            transition: all 0.3s ease;
+        }
+        .scroll-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Positive brand green accent bar */
+        .accent-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #BDE9C9, #C5B4E3, #B9D9EB);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen">
+    <!-- Barra de acento superior -->
+    <div class="accent-bar w-full"></div>
 
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
-                        <i class="fa-solid fa-book-open-reader text-amber-600 mr-3"></i>NotebookLM Prompt Master
-                    </h1>
-                    <p class="mt-2 text-lg text-gray-600 max-w-2xl">
-                        Biblioteca de prompts de alta fidelidade para pesquisa acadêmica e produção de áudio. Todos os prompts estão em sua versão completa e original em inglês.
-                    </p>
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Logo Positive -->
+                <div class="w-10 h-10 rounded-xl gradient-header flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" stroke="white" stroke-width="1.5"/>
+                    </svg>
                 </div>
-                <div class="flex gap-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
-                        v3.2 Fix
-                    </span>
+                <div>
+                    <span class="block text-lg font-bold tracking-tight logo-text">Positive Co.</span>
+                    <span class="block text-xs text-pco-text-muted">Biblioteca de Prompts</span>
                 </div>
             </div>
+            <nav class="hidden md:flex items-center gap-6 text-sm">
+                <a href="https://positiveco.com.br/" target="_blank" rel="noopener noreferrer" class="text-pco-text-muted hover:text-pco-text transition-colors font-medium">Site</a>
+                <span class="text-gray-300">|</span>
+                <a href="https://www.positivemarket.com.br/" target="_blank" rel="noopener noreferrer" class="text-pco-text-muted hover:text-pco-text transition-colors font-medium">E-commerce</a>
+                <span class="text-gray-300">|</span>
+                <a href="#sugerir" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-pco-green hover:bg-pco-green-dark text-pco-text font-semibold text-sm transition-all hover:scale-105 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Sugira um prompt
+                </a>
+            </nav>
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
         </div>
     </header>
 
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-12">
-
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 border-l-4 border-amber-500 pl-3">
-                    Estratégia de Engenharia
-                </h2>
-                <p class="text-gray-600 leading-relaxed text-sm">
-                    Para obter resultados profissionais no NotebookLM, prompts simples não funcionam. Esta biblioteca contém as instruções de "Roleplay" e "Restrição Negativa" detalhadas no relatório de pesquisa.
-                </p>
-                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <h4 class="font-semibold text-blue-800 text-sm mb-2"><i class="fa-solid fa-circle-info mr-2"></i>Dica Pro</h4>
-                    <p class="text-xs text-blue-700">
-                        Copie o prompt inteiro. Não tente traduzi-lo para o português antes de enviar, pois a "tokenização" em inglês garante que o modelo siga as instruções lógicas (como criar tabelas Markdown) com maior precisão.
-                    </p>
+    <!-- Hero -->
+    <section class="gradient-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-pco-text mb-3">
+                Biblioteca de Prompts
+            </h1>
+            <p class="text-pco-text/70 max-w-2xl text-base md:text-lg leading-relaxed">
+                Prompts curados para ChatGPT, Claude, Gemini e mais. Busque por modelo, tag ou palavra-chave e copie com um clique.
+            </p>
+            <div class="mt-6 flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-white/60 backdrop-blur rounded-lg px-4 py-2 text-sm font-medium text-pco-text">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span id="promptCount">43</span> prompts disponíveis
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Tipologia dos Prompts</h3>
+    <!-- Filtros e Busca -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+            <!-- Busca -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Buscar prompts por título ou conteúdo..."
+                        class="search-input w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-pco-green transition-all"
+                    >
                 </div>
-                <div class="chart-container">
-                    <canvas id="usageChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <section id="ai-generator" class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-6 md:p-8 shadow-sm relative overflow-hidden">
-             <div class="absolute top-0 right-0 -mt-4 -mr-4 text-amber-100 opacity-50 transform rotate-12">
-                <i class="fa-solid fa-wand-magic-sparkles text-9xl"></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="bg-white p-2 rounded-lg shadow-sm">
-                        <i class="fa-solid fa-wand-magic-sparkles text-amber-600 text-xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900">Gerador de Prompts Personalizado (IA)</h2>
-                </div>
-                <p class="text-gray-700 mb-6 max-w-3xl text-sm">
-                    Descreva seu objetivo em português. A IA criará um prompt estruturado em inglês com personas e regras.
-                </p>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-4">
-                        <textarea id="userIntent" rows="3" 
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-3 text-sm"
-                            placeholder="Ex: Quero analisar contratos jurídicos buscando cláusulas de risco..."></textarea>
-                        <button id="generateBtn" class="bg-amber-600 text-white px-6 py-2.5 rounded-lg hover:bg-amber-700 transition-colors font-medium flex items-center gap-2 text-sm">
-                            <span>Gerar Prompt Mágico ✨</span>
-                            <div id="loadingSpinner" class="loader hidden"></div>
-                        </button>
-                        <p id="errorMsg" class="text-red-600 text-xs hidden"></p>
-                    </div>
-                    <div class="lg:col-span-1">
-                        <div id="resultContainer" class="hidden h-full bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col">
-                            <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center rounded-t-lg">
-                                <span class="text-xs font-semibold text-gray-500 uppercase">Prompt Gerado</span>
-                                <button onclick="copyGeneratedPrompt()" class="text-gray-400 hover:text-amber-600 transition-colors">
-                                    <i class="fa-regular fa-copy"></i>
-                                </button>
-                            </div>
-                            <div class="p-4 flex-grow overflow-y-auto max-h-48">
-                                <p id="generatedText" class="text-xs text-gray-800 font-mono whitespace-pre-wrap"></p>
-                            </div>
-                        </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-pco-text-muted whitespace-nowrap">Modelo:</span>
+                    <div id="modelFilters" class="flex flex-wrap gap-2">
+                        <button class="model-btn active px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium transition-all hover:scale-105" data-model="all">Todos</button>
+                        <button class="model-btn px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium transition-all hover:scale-105" data-model="GPT/Claude/Gemini">GPT/Claude/Gemini</button>
+                        <button class="model-btn px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium transition-all hover:scale-105" data-model="Perplexity">Perplexity</button>
+                        <button class="model-btn px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium transition-all hover:scale-105" data-model="Nano-banana">Nano-banana</button>
+                        <button class="model-btn px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium transition-all hover:scale-105" data-model="Claude Cowork">Claude Cowork</button>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <section id="library-section">
-            <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Biblioteca de Prompts</h2>
-                    <p class="text-gray-500 text-sm mt-1">Acervo completo fiel ao relatório de pesquisa.</p>
+            <!-- Tags -->
+            <div>
+                <span class="text-xs font-medium text-pco-text-muted mb-2 block">Tags:</span>
+                <div id="tagFilters" class="flex flex-wrap gap-2">
+                    <!-- Preenchido via JS -->
                 </div>
-                <div class="relative w-full md:w-64">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-search text-gray-400"></i>
-                    </span>
-                    <input type="text" id="searchInput" 
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white placeholder-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 sm:text-sm" 
-                        placeholder="Buscar prompts...">
-                </div>
+                <button id="clearFilters" class="mt-2 text-xs text-pco-text-muted hover:text-pco-text underline underline-offset-2 transition-colors hidden">Limpar filtros</button>
             </div>
+        </div>
+    </section>
 
-            <div class="flex flex-wrap gap-2 mb-8" id="categoryFilters">
-                <button class="category-btn active px-4 py-2 rounded-lg border border-transparent text-sm font-medium transition-colors" data-category="all">Todos</button>
-                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="audio"><i class="fa-solid fa-podcast mr-2"></i>Audio (Deep Dive)</button>
-                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="analysis"><i class="fa-solid fa-glasses mr-2"></i>Fichamento & Análise</button>
-                <button class="category-btn px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors" data-category="study"><i class="fa-solid fa-graduation-cap mr-2"></i>Estudo Ativo</button>
+    <!-- Grid de Prompts -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-pco-text">
+                Prompts
+                <span id="filteredCount" class="text-sm font-normal text-pco-text-muted ml-2"></span>
+            </h2>
+            <div class="flex items-center gap-2">
+                <button id="sortNewest" class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 transition-colors">Mais novos</button>
+                <button id="sortAlpha" class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 transition-colors">A-Z</button>
             </div>
+        </div>
 
-            <div id="promptsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-                <!-- Grid items generated by JS -->
-            </div>
-            
-            <div id="emptyState" class="hidden text-center py-12">
-                <p class="text-gray-500">Nenhum prompt encontrado.</p>
-            </div>
-        </section>
+        <div id="promptsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Preenchido via JS -->
+        </div>
 
+        <div id="noResults" class="hidden text-center py-16">
+            <svg class="mx-auto mb-4 text-gray-300" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <p class="text-pco-text-muted">Nenhum prompt encontrado com os filtros aplicados.</p>
+        </div>
     </main>
 
-    <div id="copyToast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg hidden z-50 flex items-center">
-        <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
-        <span>Prompt Completo Copiado!</span>
+    <!-- Seção Sugerir -->
+    <section id="sugerir" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
+            <h2 class="text-xl font-semibold text-pco-text mb-2">Sugira um prompt</h2>
+            <p class="text-sm text-pco-text-muted mb-6">Compartilhe seus melhores prompts. Nós revisamos e adicionamos à biblioteca.</p>
+            <form id="suggestForm" class="space-y-4">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-sm font-medium text-pco-text block mb-1" for="sugName">Seu nome (opcional)</label>
+                        <input class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all" id="sugName">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-pco-text block mb-1" for="sugEmail">Seu e-mail</label>
+                        <input type="email" required class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all" id="sugEmail">
+                    </div>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-sm font-medium text-pco-text block mb-1" for="sugTitle">Título do prompt</label>
+                        <input required class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all" id="sugTitle">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-pco-text block mb-1" for="sugModel">Modelo (opcional)</label>
+                        <input class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all" id="sugModel" placeholder="ChatGPT, Claude, etc.">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-pco-text block mb-1" for="sugContent">Conteúdo do prompt</label>
+                    <textarea required rows="5" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all resize-y" id="sugContent"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-pco-text block mb-1" for="sugTags">Tags (separadas por vírgula)</label>
+                    <input class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pco-green/40 focus:border-pco-green transition-all" id="sugTags" placeholder="marketing, produtividade, finanças">
+                </div>
+                <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pco-green hover:bg-pco-green-dark text-pco-text font-semibold text-sm transition-all hover:scale-105 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                    Enviar sugestão
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg gradient-header flex items-center justify-center">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm text-pco-text-muted">
+                        <span class="font-semibold text-pco-text">Positive Company</span>
+                        <span class="mx-1">—</span>
+                        Nutrir a vida e alimentar o mundo com verdade e saúde.
+                    </div>
+                </div>
+                <p class="text-xs text-pco-text-muted">&copy; 2026 Positive Co. — Biblioteca de Prompts</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="promptModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" id="modalOverlay"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+                <div class="p-6 border-b border-gray-100 flex items-start justify-between">
+                    <div>
+                        <h3 id="modalTitle" class="text-xl font-bold text-pco-text"></h3>
+                        <p id="modalModel" class="text-sm text-pco-text-muted mt-1"></p>
+                    </div>
+                    <button id="modalClose" class="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto flex-1">
+                    <pre id="modalContent" class="text-sm leading-relaxed text-pco-text whitespace-pre-wrap font-sans"></pre>
+                </div>
+                <div class="p-6 border-t border-gray-100 flex items-center justify-between">
+                    <div id="modalTags" class="flex flex-wrap gap-2"></div>
+                    <button id="modalCopy" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pco-lilac hover:bg-pco-lilac-dark text-pco-text font-semibold text-sm transition-all hover:scale-105 active:scale-95">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Copiar prompt
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Toast -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <!-- Scroll to top -->
+    <button id="scrollTop" class="scroll-top fixed bottom-6 left-6 z-40 p-3 rounded-full bg-white shadow-lg border border-gray-200 opacity-0 pointer-events-none hover:bg-pco-green/20 transition-all">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+
     <script>
-        // --- Gemini API ---
-        const apiKey = ""; 
-        const generateBtn = document.getElementById('generateBtn');
-        const userIntentInput = document.getElementById('userIntent');
-        const resultContainer = document.getElementById('resultContainer');
-        const generatedText = document.getElementById('generatedText');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const errorMsg = document.getElementById('errorMsg');
+    // ==========================================
+    // Dados dos Prompts (Scraped de prompts.aidrop.news)
+    // ==========================================
+    const PROMPTS_DATA = [
+  {
+    "id": 1,
+    "title": "Criando Relatórios no estilo McKinsey",
+    "model": "GPT/Claude/Gemini",
+    "content": "<System>\nVocê é um Senior Engagement Manager da McKinsey & Company, especialista em estratégia, resolução estruturada de problemas e transformação organizacional. Seu raciocínio segue o framework MECE (Mutuamente Exclusivo, Coletivamente Exaustivo).\n\nSua tarefa: Criar relatórios executivos no estilo McKinsey, com recomendações claras, insights acionáveis e visualizações de dados sugeridas.\n\nPara cada relatório:\n1. Defina o problema central em uma frase\n2. Estruture a análise em hipóteses MECE\n3. Apresente dados e evidências para cada hipótese\n4. Conclua com recomendações priorizadas por impacto e facilidade\n5. Sugira próximos passos concretos com responsáveis e prazos",
+    "tags": [
+      "Negócios",
+      "Finanças",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Tchau Powerpoint, bem-vindo Claude",
+    "model": "GPT/Claude/Gemini",
+    "content": "O Claude agora pode criar apresentações por completo em menos de dois minutos. Aqui uma coleção de prompts para você economizar muuuuitas horas em slides:\n\n1. O Planejador: \"Crie um outline de apresentação sobre [tema] com [X] slides. Para cada slide, defina: título, pontos-chave (máx 3), sugestão de visual.\"\n\n2. O Designer: \"Transforme este outline em uma apresentação completa. Use linguagem executiva, dados quando possível, e sugira gráficos para cada slide de dados.\"\n\n3. O Revisor: \"Revise esta apresentação. Verifique: consistência de mensagem, fluxo narrativo, clareza dos dados, e sugira melhorias específicas.\"",
+    "tags": [
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Moodboard para um produto",
+    "model": "Nano-banana",
+    "content": "Create ONE final image.\nA clean 3×3 [ratio] storyboard grid with nine equal [ratio] sized panels on [4:5] ratio.\nUse the reference image as the base product reference. Keep the product consistent across all panels.\n\nEach panel shows the product in a different setting/mood:\n1. Minimalist studio shot, soft shadows\n2. Lifestyle flat lay with complementary items\n3. In-use/action shot\n4. Nature/outdoor setting\n5. Luxury/premium context\n6. Seasonal/holiday theme\n7. Close-up texture detail\n8. Group/social setting\n9. Artistic/editorial style\n\nKeep consistent lighting warmth. No text overlays.",
+    "tags": [
+      "Imagem",
+      "Marketing"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Um consultor de SEO com Claude Cowork",
+    "model": "Claude Cowork",
+    "content": "1) \"Abra o Chrome, acesse meu site {www.suaempresa.com} e meu perfil do Google Meu Negócio e extraia o nome da minha empresa, endereço, serviços, cidades atendidas e principais palavras-chave do meu nicho.\"\n\n2) \"Agora faça uma pesquisa no Google por cada serviço + cidade e identifique os 5 primeiros concorrentes orgânicos para cada combinação.\"\n\n3) \"Analise os sites dos concorrentes e crie uma matriz comparativa: títulos, meta descriptions, estrutura de headings, velocidade e backlinks.\"\n\n4) \"Com base na análise, crie um plano de SEO local de 90 dias com tarefas semanais priorizadas por impacto.\"",
+    "tags": [
+      "Marketing",
+      "Pesquisa",
+      "Negócios"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Ponha ordem na casa! (seu cérebro)",
+    "model": "GPT/Claude/Gemini",
+    "content": "1)\n# Aqui vão todas as informações que estão na minha cabeça (tarefas, preocupações, pendências e ideias).\n# Sua função: organizar isso em uma tabela com: Item | Categoria | Prioridade (Alta/Média/Baixa) | Próximo passo concreto | Prazo sugerido\n\n[Despeje tudo aqui]\n\n2)\n# Agora, com base na tabela, crie:\n- Um plano de ação para as próximas 48 horas (só itens de Alta prioridade)\n- Uma lista \"Pode esperar\" para a semana\n- Uma lista \"Ideias para depois\" (sem prazo)\n\n3)\n# Identifique padrões: quais categorias aparecem mais? O que isso diz sobre onde estou gastando energia mental?",
+    "tags": [
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Brainstorm digital",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você é um estrategista criativo e facilitador de brainstorming que ajuda a gerar ideias inovadoras em todos os domínios e a avaliá-las quanto à viabilidade e ao impacto.\n\n## Regras:\n1. Gere pelo menos 10 ideias por rodada\n2. Classifique cada ideia por: Originalidade (1-5), Viabilidade (1-5), Impacto Potencial (1-5)\n3. Para as top 3 ideias, desenvolva um mini-plano de execução\n4. Aplique técnicas como: SCAMPER, Analogias cruzadas, Inversão de problema\n5. Questione suposições do briefing antes de começar\n\n## Formato:\nIdeia | Descrição (1 frase) | O | V | I | Score Total\n\nComece perguntando: Qual é o desafio ou oportunidade que queremos explorar?",
+    "tags": [
+      "Negócios",
+      "Organização",
+      "Marketing",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Comece o ano refletindo",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você vai me fazer qualquer pergunta que quiser.\n# Eu vou responder da forma mais verdadeira e completa possível.\n# Com base na minha resposta, você fará outra pergunta.\n\n## Regras:\n- Faça UMA pergunta por vez\n- Comece com perguntas leves e vá aprofundando\n- Depois de 10 perguntas, faça uma análise do que percebeu sobre mim\n- Identifique: padrões, valores, medos, desejos não declarados\n- Sugira 3 reflexões que eu talvez não tenha considerado\n- Encerre com uma pergunta poderosa que eu deva me fazer toda semana",
+    "tags": [
+      "Autoconhecimento",
+      "Organização"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Fazendo planos para 2026",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você é meu estrategista pessoal.\n# Quero definir 3 resultados grandes para os próximos 12 meses (carreira, saúde/energia, dinheiro/estilo de vida).\n\nPara cada resultado:\n1. Defina a meta SMART (Específica, Mensurável, Alcançável, Relevante, Temporal)\n2. Identifique os 3 hábitos-chave que sustentam essa meta\n3. Liste os obstáculos prováveis e estratégias de contingência\n4. Crie marcos trimestrais de revisão\n5. Sugira um sistema de accountability (parceiro, app, ritual)\n\nFormato final: Um plano de uma página por meta, com visualização clara de timeline.",
+    "tags": [
+      "Autoconhecimento",
+      "Dicas",
+      "Produtividade",
+      "Organização"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Crie um selo da sua marca",
+    "model": "Nano-banana",
+    "content": "[color] glossy wax seal icon depicting [file attached] logo, lying flat on a plain white background. The seal is made of thick, deformed plastic or wax with an irregular, squashed circular shape. The surface is slightly bumpy with small air bubbles and imperfections, giving it a handmade, tactile quality. The embossed design in the center shows [describe your logo elements]. Soft, even studio lighting from above creates gentle shadows around the edges. The overall look is premium yet playful — like a luxury sticker or artisan stamp. Photorealistic render, high detail, clean composition.",
+    "tags": [
+      "Imagem"
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Estrutura básica para Vibe Coding",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Crie um app chamado [NOME_DO_APP] que ajuda [PÚBLICO-ALVO] a [OBJETIVO_PRINCIPAL].\n\n## O que o app faz:\n1. [AÇÃO_PRINCIPAL_1: ex: \"criar tarefas com título e prazo\"]\n2. [AÇÃO_PRINCIPAL_2: ex: \"marcar tarefas como concluídas\"]\n3. [AÇÃO_PRINCIPAL_3: ex: \"filtrar por categoria\"]\n\n## Stack técnica:\n- Frontend: [React/Vue/Svelte]\n- Backend: [Node/Python/Supabase]\n- Database: [PostgreSQL/SQLite/Firebase]\n- Deploy: [Vercel/Netlify/Railway]\n\n## Regras:\n- Mobile-first e responsivo\n- Dark mode por padrão\n- Sem dependências desnecessárias\n- Código limpo e comentado\n- Testes para funções críticas",
+    "tags": [
+      "Vibe Coding"
+    ]
+  },
+  {
+    "id": 11,
+    "title": "O GPT-5.1 e as memórias sobre você",
+    "model": "GPT/Claude/Gemini",
+    "content": "Você poderia revisar todo o nosso histórico de conversa – ou o máximo que você consegue ver no histórico – e me contar sobre mim e sobre o que aconteceu nas nossas conversas ao longo do tempo?\n\nEspecificamente:\n1. O que você aprendeu sobre mim (interesses, estilo, valores)\n2. Como meus pedidos evoluíram ao longo do tempo\n3. Padrões que você notou (horários, temas recorrentes, forma de perguntar)\n4. O que mudou na forma como eu uso a IA\n5. Algo que você percebeu sobre mim que eu talvez não tenha percebido\n\nSeja honesto e detalhado. Quero um retrato completo.",
+    "tags": [
+      "Autoconhecimento"
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Tendências globais por área",
+    "model": "Perplexity",
+    "content": "# Analise as tendências globais do setor [setor] desde 2023.\n# Destaque os motores de crescimento, os ventos contrários (principais desafios), os players-chave e as oportunidades emergentes.\n# Apresente os dados em formato de tabela com colunas: Tendência | Driver | Desafio | Oportunidade | Players Relevantes\n# Inclua dados quantitativos quando disponíveis (CAGR, market size, funding)\n# Finalize com 3 previsões para os próximos 2 anos\n# Cite as fontes utilizadas",
+    "tags": [
+      "Pesquisa",
+      "Negócios"
+    ]
+  },
+  {
+    "id": 13,
+    "title": "Compare concorrentes",
+    "model": "Perplexity",
+    "content": "# Liste as 10 melhores startups do mundo que resolvem [problema].\n# Para cada uma, inclua: fundadores, rodadas de financiamento, abordagem única, diferencial e site.\n# Apresente o resultado em uma tabela comparativa.\n# Adicione uma coluna de \"Score de Inovação\" (1-10) baseado em: originalidade da solução, tração de mercado e potencial de escala.\n# Finalize com: quais lacunas ainda existem nesse mercado?",
+    "tags": [
+      "Pesquisa",
+      "Marketing",
+      "Negócios"
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Pesquisa por artigos",
+    "model": "Perplexity",
+    "content": "# Atue como colaborador de pesquisa especializado em [campo].\n# Busque os artigos mais recentes (últimos 12 meses) sobre [tópico], resuma as contribuições principais, destaque os métodos utilizados e identifique gaps na literatura.\n# Formato:\n- Artigo | Autores | Ano | Método | Achado Principal | Gap Identificado\n# Após a tabela:\n1. Síntese dos achados convergentes\n2. Contradições entre estudos\n3. Sugestões de pesquisa futura\n# Cite fontes reais e verificáveis",
+    "tags": [
+      "Organização",
+      "Produtividade",
+      "Pesquisa"
+    ]
+  },
+  {
+    "id": 15,
+    "title": "Use o GPT como um PRO",
+    "model": "GPT/Claude/Gemini",
+    "content": "Ramificação de chats para decisões: explorando mudanças de carreira ou estratégias de negócio? Use o poder da \"realidade alternativa\" e crie ramificações de conversa para cada cenário:\n\n1. \"Crie 3 cenários paralelos para [decisão]. Para cada um, simule os próximos 6 meses considerando riscos, oportunidades e impacto emocional.\"\n\n2. \"Agora compare os 3 cenários em uma matriz: Cenário | Melhor caso | Pior caso | Caso mais provável | Nível de arrependimento se NÃO escolher\"\n\n3. \"Com base na análise, qual cenário maximiza aprendizado e minimiza arrependimento? Por quê?\"",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 16,
+    "title": "Nano-banana + Dados estruturados",
+    "model": "Nano-banana",
+    "content": "*O prompt está preenchido com um exemplo*\n\nPrompt: {\n  \"Objective\": \"Generate a cinematic photorealistic image of a man standing at a café door during autumn rain, about to leave\",\n  \"Scene\": {\n    \"Setting\": \"Parisian café entrance, cobblestone street, autumn\",\n    \"Time\": \"Late afternoon, golden hour fading into blue hour\",\n    \"Weather\": \"Light rain, wet surfaces reflecting warm café light\"\n  },\n  \"Subject\": {\n    \"Description\": \"30s man, dark wool coat, scarf, looking back over shoulder\",\n    \"Expression\": \"Melancholic nostalgia, slight smile\",\n    \"Pose\": \"Hand on door, half-turned\"\n  },\n  \"Camera\": {\n    \"Lens\": \"85mm f/1.4\",\n    \"Angle\": \"Slightly low, eye level\",\n    \"DOF\": \"Shallow, subject sharp, background beautifully blurred\"\n  },\n  \"Style\": \"Cinematic, Wong Kar-wai color grading, film grain\"\n}",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 17,
+    "title": "Prompts do Satya Nadella",
+    "model": "GPT/Claude/Gemini",
+    "content": "1. Com base nas minhas interações anteriores com [pessoa], me dê 5 coisas que provavelmente estarão na cabeça dela na nossa próxima reunião.\n\n2. Estamos no caminho certo para o lançamento do [projeto]? Me dê um status report com: o que está verde, amarelo e vermelho.\n\n3. Sintetize esses 3 documentos em uma página: prioridades-chave, decisões pendentes e riscos que preciso endereçar.\n\n4. Sou CEO. Prepare um briefing de 5 minutos sobre [tema] que eu possa usar com o board: contexto, números, recomendação, e um \"e se\" provocativo.\n\n5. Depois da reunião, crie action items com dono e prazo para cada decisão tomada.",
+    "tags": [
+      "Dicas",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 18,
+    "title": "\"Show Me\" - as palavrinhas mágicas",
+    "model": "Nano-banana",
+    "content": "Que os prompts são melhores em inglês, todo mundo já sabe. Mas, para editar imagens, você já testou? Foram descobertas duas palavrinhas mágicas para editar no Nano banana: \"SHOW ME\" (me mostre).\n\nExemplos:\n- \"Show me this person 20 years older\"\n- \"Show me this room with different furniture\"\n- \"Show me this outfit in a different color\"\n- \"Show me what this building would look like at night\"\n- \"Show me this product in a luxury setting\"\n\nA combinação \"Show me\" + descrição clara do que você quer ver funciona como um comando direto de edição, muito mais eficaz que descrições longas.",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 19,
+    "title": "Aproveite o que sua IA sabe sobre você",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você tem acesso às memórias já salvas do usuário.\n(ex.: cargo/área, rotina diária, nível de energia, responsabilidades domésticas, prioridades, hobbies, ferramentas que usa, estilo de comunicação)\n\nCom base nessas informações:\n1. Sugira uma rotina matinal otimizada para meu perfil\n2. Identifique 3 áreas onde estou desperdiçando tempo/energia\n3. Proponha automações ou delegações que fazem sentido para meu contexto\n4. Crie um \"manual do usuário\" sobre mim — como se fosse entregar para um novo assistente\n5. O que uma versão 10x mais produtiva de mim faria diferente?",
+    "tags": [
+      "Autoconhecimento",
+      "Dicas",
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 20,
+    "title": "Estrutura para Prompt de Reasoning",
+    "model": "GPT/Claude/Gemini",
+    "content": "<pedido>\n[Sua solicitação específica aqui]\n</pedido>\n\n<instrucoes>\n1. Primeiro, crie um plano breve descrevendo sua abordagem\n2. Explique seu raciocínio para essa abordagem\n3. Execute o plano passo a passo\n4. Após completar, revise criticamente seu trabalho\n5. Identifique pontos fracos ou suposições\n6. Se encontrar erros, corrija e explique\n7. Apresente o resultado final com nível de confiança (Alta/Média/Baixa)\n</instrucoes>\n\n<formato>\nPlano → Raciocínio → Execução → Revisão → Resultado Final\n</formato>",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 21,
+    "title": "Caçando promoções e pechinchas",
+    "model": "GPT/Claude/Gemini",
+    "content": "1) Com o ChatGPT Agent:\n\"Encontre cupons de desconto para a loja [LOJA], vá para o site, adicione o [PRODUTO/ITEM] no carrinho, vá até o checkout e teste o cupom de desconto, até encontrar um que funcione.\"\n\n2) Comparador de preços:\n\"Pesquise o preço de [PRODUTO] em pelo menos 5 lojas online brasileiras. Crie uma tabela com: Loja | Preço | Frete | Prazo | Cupom disponível | Link\"\n\n3) Alerta de preço:\n\"Me ajude a definir uma estratégia para comprar [PRODUTO] pelo menor preço. Qual o histórico de preço? Quais épocas do ano costumam ter promoção? Quais sites de cashback funcionam?\"",
+    "tags": [
+      "Finanças",
+      "Dicas"
+    ]
+  },
+  {
+    "id": 22,
+    "title": "Do nível 1 ao 4 de profundidade",
+    "model": "GPT/Claude/Gemini",
+    "content": "Tratar o seu assistente favorito de IA como se fosse uma barra de busca é um desperdício do poder das ferramentas e do seu precioso tempo.\n\nEleve a qualidade dos seus prompts com 4 níveis:\n\nNível 1 - Busca: \"O que é marketing digital?\"\nNível 2 - Contexto: \"Explique marketing digital para um dono de padaria que quer atrair clientes locais\"\nNível 3 - Tarefa: \"Crie um plano de marketing digital de 30 dias para uma padaria artesanal em São Paulo, orçamento R$500/mês\"\nNível 4 - Sistema: \"Você é um consultor de marketing digital especializado em negócios locais. Analise meu negócio [descreva] e crie uma estratégia completa com métricas de acompanhamento\"",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 23,
+    "title": "Gerente de Produtividade",
+    "model": "GPT/Claude/Gemini",
+    "content": "# A partir de agora você é o melhor gerente de produtividade do mundo. Crie um cronograma para otimizar minha produtividade.\n\n## Quero que você me faça uma série de perguntas que irão determinar o melhor plano para mim:\n1. Qual meu horário de trabalho?\n2. Quais são minhas responsabilidades principais?\n3. Quais tarefas me drenam mais energia?\n4. Quando sou mais produtivo (manhã/tarde/noite)?\n5. Quais ferramentas já uso?\n6. Qual meu maior gargalo atual?\n\n## Após minhas respostas, entregue:\n- Cronograma diário otimizado em blocos de tempo\n- Lista de tarefas automatizáveis\n- Sugestão de ferramentas para cada gargalo\n- Ritual de início e fim de dia",
+    "tags": [
+      "Organização",
+      "Produtividade",
+      "Negócios"
+    ]
+  },
+  {
+    "id": 24,
+    "title": "Organizar Textos sem Formatação",
+    "model": "GPT/Claude/Gemini",
+    "content": "Prompt 1 - Inserindo um arquivo:\n---\n# Organize e resuma o arquivo inserido com base na estrutura a seguir:\n<estrutura>\n1. Tópico\n[Breve explicação do Tópico 1]\n1.1 - Subtópico\n    - Ponto chave\n    - Ponto chave\n1.2 - Subtópico\n    - Ponto chave\n</estrutura>\n\nPrompt 2 - Colando texto:\n---\n# Organize o texto abaixo em uma estrutura hierárquica clara:\n- Identifique os temas principais\n- Agrupe informações relacionadas\n- Elimine redundâncias\n- Mantenha a essência de cada ponto\n- Adicione headers e sub-headers\n\n[Cole seu texto aqui]",
+    "tags": [
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 25,
+    "title": "Montar uma Carteira de Investimentos",
+    "model": "GPT/Claude/Gemini",
+    "content": "Finja que você é Warren Buffett e está criando o melhor plano de investimento para um horizonte de 15 anos. Faça-me uma série de perguntas que o ajudarão a determinar o melhor plano personalizado:\n\n1. Qual sua idade e situação financeira atual?\n2. Qual sua tolerância a risco (1-10)?\n3. Já investe? Se sim, em quê?\n4. Qual valor mensal disponível para investir?\n5. Tem reserva de emergência?\n6. Quais seus objetivos (aposentadoria, imóvel, renda passiva)?\n\nApós minhas respostas:\n- Sugira uma alocação por classe de ativo (%)\n- Recomende produtos específicos para cada classe\n- Crie um calendário de aportes e rebalanceamento\n- Simule cenários otimista, moderado e pessimista",
+    "tags": [
+      "Organização",
+      "Finanças"
+    ]
+  },
+  {
+    "id": 26,
+    "title": "Seis Estratégias para Melhores Prompts",
+    "model": "GPT/Claude/Gemini",
+    "content": "1. Seja o mais claro possível: converse com a IA como se estivesse dando instruções a um turista perdido. Quanto mais específico você for, menor será a probabilidade de acabar em uma padaria quando queria um hospital.\n\n2. Dê contexto: \"Escreva sobre marketing\" é vago. \"Escreva um post de LinkedIn sobre marketing digital para pequenas empresas B2B no Brasil\" é direcionado.\n\n3. Defina o formato: Diga se quer bullet points, tabela, texto corrido, código, ou um plano passo a passo.\n\n4. Atribua um papel: \"Você é um especialista em...\" funciona melhor do que instruções genéricas.\n\n5. Dê exemplos: Mostre o que espera como resultado com um exemplo concreto.\n\n6. Itere: O primeiro resultado raramente é perfeito. Refine, peça ajustes, dê feedback.",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 27,
+    "title": "Criar um Lean Canvas",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você é um estrategista de startups + IA.\n# Gere um Lean Canvas com o meu auxílio a partir de perguntas que irei responder.\n\n1. Se faltar dado em qualquer um dos 9 blocos, faça suposições educadas e sinalize com [SUPOSIÇÃO]\n2. Faça perguntas sobre: Problema, Segmento de clientes, Proposta de valor única, Solução, Canais, Receita, Custos, Métricas-chave, Vantagem injusta\n3. Após coletar as respostas, apresente o Lean Canvas em formato visual (tabela)\n4. Adicione uma seção \"Riscos Críticos\" com os 3 maiores riscos do modelo\n5. Sugira 3 experimentos rápidos para validar as hipóteses mais arriscadas",
+    "tags": [
+      "Marketing",
+      "Organização"
+    ]
+  },
+  {
+    "id": 28,
+    "title": "Padronizar Respostas de E-mail",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Armazene esses padrões de resposta de e-mails:\n\n<exemplo-1>\n## E-mail recebido:\n[coloque o texto do e-mail]\n## E-mail enviado\n[coloque o texto do e-mail resposta]\n</exemplo-1>\n\n<exemplo-2>\n## E-mail recebido:\n[coloque o texto do e-mail]\n## E-mail enviado\n[coloque o texto do e-mail resposta]\n</exemplo-2>\n\n# Agora, quando eu colar um novo e-mail, responda seguindo:\n1. O mesmo tom e formalidade dos exemplos\n2. A mesma estrutura (saudação, corpo, fechamento)\n3. Adapte o conteúdo ao contexto do novo e-mail\n4. Mantenha o comprimento similar\n5. Se houver dúvida sobre o tom, pergunte antes de responder",
+    "tags": [
+      "Dicas",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 29,
+    "title": "Criar Nomes de Produtos",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Contextualizando: Sua tarefa é gerar nomes de produtos criativos, memoráveis e comercializáveis com base na descrição e nas palavras-chave fornecidas. Os nomes dos produtos devem ser cativantes, fáceis de lembrar e livres de conotações negativas.\n\nForneça:\n- Descrição do produto: [descreva]\n- Palavras-chave: [liste 3-5]\n- Tom desejado: [sofisticado/divertido/técnico/natural]\n- Público-alvo: [descreva]\n\nEntregue:\n1. 10 opções de nomes com justificativa\n2. Verificação rápida de disponibilidade (domínio .com.br e @instagram)\n3. Para os top 3: tagline, variações e teste de pronúncia em português",
+    "tags": [
+      "Marketing"
+    ]
+  },
+  {
+    "id": 30,
+    "title": "Criar E-mails de Vendas",
+    "model": "GPT/Claude/Gemini",
+    "content": "1. \"Estou procurando um [tipo de e-mail] que envolva minha [persona ideal] apresentando os aspectos transformadores do meu [produto/serviço] e os leve a [ação desejada] apoiada em [prova social, escassez, benefício claro].\"\n\n2. \"Crie uma sequência de 5 e-mails de vendas para [produto]:\n   - E-mail 1: Gancho (problema + empatia)\n   - E-mail 2: Educação (conteúdo de valor)\n   - E-mail 3: Prova social (cases e depoimentos)\n   - E-mail 4: Oferta (proposta irresistível)\n   - E-mail 5: Urgência (último lembrete)\"\n\n3. Para cada e-mail: assunto (2 opções), preview text, corpo, CTA, e horário ideal de envio.",
+    "tags": [
+      "Marketing",
+      "Negócios",
+      "Organização"
+    ]
+  },
+  {
+    "id": 31,
+    "title": "Usar a Memória do modelo de IA",
+    "model": "GPT/Claude/Gemini",
+    "content": "## Prompt 1:\nBaseado nas suas memórias, me diga algo que eu possa não saber sobre mim.\n\n## Prompt 2:\nBaseado no que você sabe sobre mim, desenhe uma foto de como você imagina que eu sou.\n\n## Prompt 3:\nAnalisando nossas conversas, quais são meus 3 maiores pontos fortes e 3 maiores pontos cegos?\n\n## Prompt 4:\nSe você fosse meu mentor, que conselho me daria baseado em tudo que sabe sobre mim?\n\n## Prompt 5:\nCrie um \"perfil psicológico leve\" baseado nos meus padrões de conversa: como penso, o que valorizo, como tomo decisões.",
+    "tags": [
+      "Autoconhecimento"
+    ]
+  },
+  {
+    "id": 32,
+    "title": "Planejamento Financeiro",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Atue como um especialista em finanças e orçamento.\n# Gere um plano de orçamento abrangente com base na {renda}, {despesas} e {metas de economia} fornecidas.\n# Analise os dados fornecidos e categorize as despesas.\n\nEstrutura:\n1. Diagnóstico: Renda vs. Despesas (% por categoria)\n2. Regra adaptada: Sugira uma divisão personalizada (inspirada em 50-30-20 mas adaptada à realidade)\n3. Cortes inteligentes: 5 despesas que podem ser otimizadas sem perda de qualidade de vida\n4. Meta de emergência: Quanto e em quanto tempo\n5. Investimentos: Onde alocar o excedente\n6. Dashboard mensal: Template de acompanhamento",
+    "tags": [
+      "Finanças",
+      "Organização"
+    ]
+  },
+  {
+    "id": 33,
+    "title": "Aprender Novas Habilidades com o Método SMART",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Aja como um Pesquisador Educacional especializado em dinâmicas de aquisição de habilidades.\n\n## Com base em sua expertise, trace uma curva de aprendizado hipotética para [habilidade desejada]:\n1. Fase 1 (0-30 dias): O que aprender primeiro? Recursos recomendados?\n2. Fase 2 (30-90 dias): Como praticar deliberadamente?\n3. Fase 3 (90-180 dias): Como consolidar e aplicar?\n4. Fase 4 (180-365 dias): Como alcançar nível avançado?\n\nPara cada fase defina:\n- Meta SMART\n- Horas semanais necessárias\n- Recursos específicos (cursos, livros, projetos)\n- Marco de validação (como saber que avancei)\n- Armadilhas comuns a evitar",
+    "tags": [
+      "Autoconhecimento",
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 34,
+    "title": "Métodos para Tomada de Decisão",
+    "model": "GPT/Claude/Gemini",
+    "content": "1) Prós e Contras\n\"Estou tentando decidir se devo [inserir decisão]. Dê-me uma lista de prós e contras que me ajudará a decidir por que devo ou não tomar essa decisão.\"\n\n2) O Conselho dos Sábios\n\"Preciso tomar uma decisão sobre [tema]. Me dê a perspectiva de 5 pessoas: um CEO, um psicólogo, um filósofo, um amigo pragmático e minha avó sábia.\"\n\n3) Inversão (via negativa)\n\"Em vez de me dizer o que fazer, me diga: o que eu definitivamente NÃO devo fazer em relação a [decisão]?\"\n\n4) 10/10/10\n\"Como me sentirei sobre essa decisão em 10 minutos? 10 meses? 10 anos?\"",
+    "tags": [
+      "Autoconhecimento",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 35,
+    "title": "Simular Consultor de Investimentos (Warren Buffett)",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Finja que você é Warren Buffett e está criando o melhor plano de investimento para um horizonte de 15 anos. Faça-me uma série de perguntas que o ajudarão a determinar o melhor plano de investimento para mim.\n\nRegras do jogo:\n1. Faça UMA pergunta por vez\n2. Espere minha resposta antes de continuar\n3. Use linguagem simples (como Buffett faria)\n4. Após 8-10 perguntas, apresente o plano\n5. Inclua as \"Regras de Ouro Buffett\" aplicadas ao meu perfil\n6. Simule uma carta anual ao acionista (eu) explicando a estratégia",
+    "tags": [
+      "Finanças"
+    ]
+  },
+  {
+    "id": 36,
+    "title": "Criar Calendário de Conteúdo",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Elabore um cronograma de postagens para redes sociais, com duração de um mês, com [Número] publicações por semana no [Exemplo: Facebook, Instagram e LinkedIn]. O primeiro dia de postagem é [Data].\n\nPara cada postagem inclua:\n- Data e dia da semana\n- Plataforma\n- Tipo de conteúdo (carrossel, reels, stories, post estático, artigo)\n- Título/hook\n- Descrição do conteúdo (2-3 frases)\n- Hashtags sugeridas (5-10)\n- Melhor horário para publicar\n- CTA (chamada para ação)\n\nFormato: Tabela organizada por semana\nAdicione uma linha de \"conteúdo de oportunidade\" para cada semana (datas comemorativas, trends).",
+    "tags": [
+      "Marketing",
+      "Organização"
+    ]
+  },
+  {
+    "id": 37,
+    "title": "Análise de Tópico com o Círculo Dourado",
+    "model": "GPT/Claude/Gemini",
+    "content": "Aja como Simon Sinek revisando [tópico] usando o Círculo Dourado (Golden Circle)\n\nComece mergulhando profundamente no cerne do [tópico]. Resposta: Por que isso realmente importa? Qual é a crença fundamental ou propósito por trás disso?\n\nDepois passe para o Como: Quais são os processos, métodos ou princípios únicos que fazem isso funcionar? O que diferencia a abordagem?\n\nFinalize com o O Quê: Quais são os resultados tangíveis, produtos ou ações?\n\nEstrutura da resposta:\n🟡 WHY (Por quê?) — propósito e crença\n🟠 HOW (Como?) — processo diferenciado\n🔴 WHAT (O quê?) — resultados concretos\n\nConclua com: Como comunicar isso de forma inspiradora em 30 segundos (elevator pitch).",
+    "tags": [
+      "Marketing"
+    ]
+  },
+  {
+    "id": 38,
+    "title": "Desenvolver Ideias com \"Tree of Thoughts\"",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Imagine que três especialistas diferentes estão respondendo a esta pergunta.\n## Todos os especialistas escreverão um passo de seu raciocínio, e então compartilharão com o grupo.\n## Se algum especialista perceber que errou, ele sai.\n\nA pergunta é: [sua pergunta aqui]\n\nEspecialistas:\n1. O Analítico (dados, lógica, evidências)\n2. O Criativo (analogias, conexões inesperadas, inovação)\n3. O Prático (viabilidade, recursos, implementação)\n\nRodada 1: Cada um apresenta sua perspectiva inicial\nRodada 2: Cada um critica as outras perspectivas\nRodada 3: Convergência — o que todos concordam?\nFinal: Síntese das melhores ideias em um plano de ação",
+    "tags": [
+      "Autoconhecimento"
+    ]
+  },
+  {
+    "id": 39,
+    "title": "Controlar Planilhas no ChatGPT",
+    "model": "GPT/Claude/Gemini",
+    "content": "[Anexe sua planilha ou print da tela]\n\n# Crie uma tabela dinâmica com base no [print da tela, PDF anexado]\n—\n# Mova a coluna X à direita da coluna Y\n—\n# Mova a linha X abaixo da linha Y\n—\n# Adicione uma coluna de totais\n—\n# Crie gráficos a partir dos dados\n—\n# Formate como tabela profissional com cores alternadas\n—\n# Adicione fórmulas de: soma, média, contagem condicional\n—\n# Exporte em formato CSV/Excel\n\nDica: O ChatGPT com Code Interpreter pode manipular planilhas reais. Envie o arquivo e peça transformações específicas.",
+    "tags": [
+      "Produtividade",
+      "Dicas"
+    ]
+  },
+  {
+    "id": 40,
+    "title": "Argumente com várias perspectivas",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Apresente 3 perspectivas sobre [sua situação/decisão, descrita de forma neutra]:\n\n1. Alguém que apoia fortemente a posição.\n2. Alguém que discorda totalmente.\n3. Um mediador neutro e analítico.\n\nPara cada perspectiva:\n- Argumento principal (2-3 frases)\n- Evidência ou analogia que sustenta\n- Maior fraqueza do argumento\n- O que essa pessoa diria para convencer as outras duas\n\nApós as 3 perspectivas:\n- Onde os argumentos convergem?\n- Qual perspectiva tem a base mais sólida? Por quê?\n- Que informação adicional mudaria a análise?",
+    "tags": [
+      "Dicas"
+    ]
+  },
+  {
+    "id": 41,
+    "title": "Não perca tempo refazendo prompts! (GPT Plus)",
+    "model": "GPT/Claude/Gemini",
+    "content": "Se você usa o GPT para tarefas repetidas e está sempre colocando o mesmo prompt todas as vezes, pare de perder esse precioso tempo:\n\nA primeira resposta da IA costuma ser a mais genérica. Use este framework para iterar:\n\n1. Primeiro prompt: Dê a instrução básica\n2. Segundo prompt: \"Isso está bom, mas ajuste [X] e adicione [Y]\"\n3. Terceiro prompt: \"Agora salve essas instruções como meu padrão para [tipo de tarefa]\"\n\nDica PRO: No ChatGPT Plus, use as \"Custom Instructions\" para definir contexto permanente:\n- Quem você é\n- Como gosta de receber respostas\n- Formatos preferidos\n- O que nunca incluir",
+    "tags": []
+  },
+  {
+    "id": 42,
+    "title": "Criando um Lean Canvas",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Você é um estrategista de startups + IA.\n# Gere um Lean Canvas com o meu auxílio a partir de perguntas que irei responder.\n\n1. Se faltar dado em qualquer um dos 9 blocos, faça suposições educadas e sinalize com [SUPOSIÇÃO]\n2. Faça perguntas sobre: Problema, Segmento de clientes, Proposta de valor única, Solução, Canais, Receita, Custos, Métricas-chave, Vantagem injusta\n3. Após coletar as respostas, apresente o Lean Canvas em formato visual (tabela)\n4. Adicione uma seção \"Riscos Críticos\" com os 3 maiores riscos do modelo\n5. Sugira 3 experimentos rápidos para validar as hipóteses mais arriscadas",
+    "tags": [
+      "Organização",
+      "Produtividade"
+    ]
+  },
+  {
+    "id": 43,
+    "title": "Descubra o seu IKIGAI",
+    "model": "GPT/Claude/Gemini",
+    "content": "# Aja como meu coach de Ikigai, me fazendo perguntas detalhadas sobre minha vida.\n\n## Continue perguntando até ter um entendimento completo de onde minhas paixões, minhas habilidades, as necessidades do mundo e oportunidades de remuneração se cruzam.\n\nRegras:\n1. Faça UMA pergunta por vez\n2. Explore os 4 círculos: O que amo | O que faço bem | O que o mundo precisa | Pelo que posso ser pago\n3. Após 12-15 perguntas, apresente meu diagrama de Ikigai\n4. Identifique: Paixão, Missão, Vocação e Profissão\n5. Sugira 3 caminhos concretos que estão na interseção de todos os círculos\n6. Para cada caminho: primeiro passo, timeline de 90 dias, recursos necessários",
+    "tags": [
+      "Autoconhecimento"
+    ]
+  }
+];
 
-        generateBtn.addEventListener('click', async () => {
-            const intent = userIntentInput.value.trim();
-            if (!intent) {
-                errorMsg.textContent = "Por favor, descreva seu objetivo primeiro.";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            errorMsg.classList.add('hidden');
-            generateBtn.disabled = true;
-            generateBtn.querySelector('span').textContent = "Gerando...";
-            loadingSpinner.classList.remove('hidden');
-            resultContainer.classList.add('hidden');
+    // ==========================================
+    // Estado da aplicação
+    // ==========================================
+    let state = {
+        search: '',
+        model: 'all',
+        tags: [],
+        sort: 'newest',
+    };
 
-            const systemPrompt = "You are an expert prompt engineer for Google's NotebookLM. Create a highly detailed, structured prompt in ENGLISH based on the user's intent. Include roles, constraints, and output formats.";
-            const userPrompt = `Create a NotebookLM prompt for: ${intent}`;
+    // ==========================================
+    // Inicialização
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        injectPromptsData();
+        renderTags();
+        renderPrompts();
+        setupEventListeners();
+    });
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: userPrompt }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-                
-                if (!response.ok) throw new Error('API Error');
-                
-                const data = await response.json();
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro ao gerar texto.";
-                
-                generatedText.textContent = aiText;
-                resultContainer.classList.remove('hidden');
-            } catch (error) {
-                console.error(error);
-                errorMsg.textContent = "Erro ao gerar prompt. Tente novamente.";
-                errorMsg.classList.remove('hidden');
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.querySelector('span').textContent = "Gerar Prompt Mágico ✨";
-                loadingSpinner.classList.add('hidden');
-            }
-        });
+    function injectPromptsData() {
+        // Os dados já estão carregados na constante PROMPTS_DATA
+    }
 
-        function copyGeneratedPrompt() { copyToClipboard(generatedText.textContent); }
+    // ==========================================
+    // Renderização de Tags
+    // ==========================================
+    function getAllTags() {
+        const tagSet = new Set();
+        PROMPTS_DATA.forEach(p => p.tags.forEach(t => tagSet.add(t)));
+        return Array.from(tagSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    }
 
-        // --- FULL TEXT PROMPTS DATA ---
-        const promptsData = [
-            // --- AUDIO & PODCAST ---
-            {
-                id: 1,
-                title: "The Job Interview Simulation",
-                category: "audio",
-                description: "Simula uma entrevista de emprego difícil. O Host 1 é o candidato (hesitante) e o Host 2 é o gerente que corrige e ensina o método STAR.",
-                prompt: "Focus on a job interview simulation.\n\nContext: Use the uploaded documents (resumes, job descriptions, or technical guides) to act as the knowledge base.\n\nRoleplay Instructions:\n* Host 1 (Candidate): Acts as the candidate answering tentatively. Occasionally gets an answer wrong or lacks structured reasoning.\n* Host 2 (Hiring Manager): Acts as the seasoned hiring manager or coach. Interrupts to correct Host 1, explaining the 'STAR' method (Situation, Task, Action, Result) and providing the ideal technical answer based on the source documents.\n\nGoal: Provide a simulated feedback loop so the listener learns from the candidate's mistakes.",
-                tags: ["entrevista", "carreira", "roleplay"]
-            },
-            {
-                id: 2,
-                title: "The Skeptical Journalist (Debate)",
-                category: "audio",
-                description: "Cria um debate acalorado onde o Host 2 ataca a tese do texto para testar sua robustez.",
-                prompt: "Simulate a heated debate.\n* Host 1 (The Author): Represents the perspective of the uploaded text. Defends the thesis passionately using facts from the source.\n* Host 2 (The Skeptical Journalist): Acts as an investigative journalist who questions every claim. Ask about evidence, potential biases, blind spots, and alternative explanations.\n\nConstraint: The journalist must be relentless but fair. The author must respond only using facts present in the source documents. Do not hallucinate external data.\n\nGoal: To expose any logical fallacies or gaps in the provided text.",
-                tags: ["debate", "crítica", "jornalismo"]
-            },
-            {
-                id: 3,
-                title: "The Academic Review (Neutral Tone)",
-                category: "audio",
-                description: "Remove o estilo 'podcast animado' padrão, forçando um tom acadêmico, neutro e preciso.",
-                prompt: "You are the host of 'The Academic Review,' a podcast that provides clear, structured, and neutral overviews of complex papers. Your tone is that of a grounded, informed, and dispassionate colleague. Your primary goal is to inform, not to entertain.\n\nGuidelines:\n* Tone: Maintain a measured, even delivery. Avoid melodrama, excessive enthusiasm, or conversational filler words like 'mind-blowing' or 'whoa'.\n* Language: Use precise, academic language. Prioritize phrases like 'the author examines,' 'the thesis contends,' 'the data suggests.'\n* Structure: Begin with the research question, move methodically to methodology, then results, and finally conclusions.\n* Neutrality: Frame critiques objectively. Instead of saying 'this is bad,' say 'This approach does not account for X'.",
-                tags: ["acadêmico", "sério", "ciência"]
-            },
-            {
-                id: 4,
-                title: "Deep Dive After Dark (Informal/Raw)",
-                category: "audio",
-                description: "Transforma temas áridos em uma conversa de bar, usando gírias e informalidade radical.",
-                prompt: "This episode is for a mature audience. The hosts are encouraged to speak freely, use slang, and be irreverent. The tone should be informal, conversational, and raw.\n* Instruction: Do not censor language if it fits the flow. Use strong expressions to emphasize frustration with complex topics.\n* Analogy: The episode should feel like a heated discussion between friends at a bar, complaining about the complexity of the text while trying to understand it.\n* Keywords: Use phrases like 'cut the crap', 'let's be real', 'messy'.\n* Goal: Make this dry source material entertaining through brutal honesty.",
-                tags: ["informal", "engajamento", "humor"]
-            },
-            {
-                id: 5,
-                title: "Quiz Show Gamification",
-                category: "audio",
-                description: "Transforma o áudio em um Quiz Show interativo para revisão de matéria.",
-                prompt: "You're hosting a fun quiz show with two hosts.\n* Host 1 (Quizmaster): Quizzes Host 2 on concepts from my uploaded lecture slides. Include a mix of multiple choice and true/false questions.\n* Host 2 (Contestant): Attempts to answer. Occasionally gets an answer wrong to simulate common misconceptions.\n* Correction Mechanism: When Host 2 gets it wrong, Host 1 must step in to explain the correct answer in a clear and concise way, citing the specific slide or page.\n* Ending: Share the final score and a brief summary of the key topics covered.",
-                tags: ["estudo", "quiz", "ativo"]
-            },
+    function renderTags() {
+        const container = document.getElementById('tagFilters');
+        const tags = getAllTags();
+        container.innerHTML = tags.map(tag =>
+            `<button class="tag-pill px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium transition-all" data-tag="${tag}">${tag}</button>`
+        ).join('');
+    }
 
-            // --- FICHAMENTO & ANALYSIS ---
-            {
-                id: 6,
-                title: "The Gap Hunter (Caçador de Lacunas)",
-                category: "analysis",
-                description: "Identifica falhas metodológicas e teóricas nos textos. Essencial para teses.",
-                prompt: "You are an expert research mentor specializing in this field. Analyze the provided collection of papers. Identify at least three categories of research gaps:\n(a) Methodological (weaknesses in how studies were conducted)\n(b) Theoretical (concepts not fully explored or defined)\n(c) Empirical/Contextual (populations or contexts ignored)\n\nFor each category, create a Markdown table with the following columns:\n1. Gap Description: A one-sentence description of what is missing.\n2. Evidence of Deficiency: Cite a specific paper that highlights this limitation.\n3. Suggested Research Question: Propose a novel question that could address this gap.",
-                tags: ["pesquisa", "lacunas", "doutorado"]
-            },
-            {
-                id: 7,
-                title: "The Contradiction Finder",
-                category: "analysis",
-                description: "Mapeia onde os autores discordam entre si, criando uma matriz de conflitos.",
-                prompt: "From the provided papers, identify major contradictions or conflicting findings among the authors. Do not smooth over the differences; highlight them.\n\nPresent the output as a structured list:\n* Contradiction Subject:\n* Viewpoint A: Specific claim/result from Paper X (with citation).\n* Viewpoint B: Opposing claim/result from Paper Y (with citation).\n* Root Cause Analysis: Suggest possible reasons for the disagreement (e.g., differences in methodology, sample demographics, or theoretical frameworks).\n* Resolution Path: What kind of further evidence would resolve this conflict?",
-                tags: ["síntese", "comparação", "contradição"]
-            },
-            {
-                id: 8,
-                title: "Methodology Deep Dive",
-                category: "analysis",
-                description: "Analisa a robustez metodológica, extraindo vieses e limitações recorrentes.",
-                prompt: "Analyze the methodological weaknesses and recurring challenges in the field based on these sources. Extract 4–6 common issues (e.g., small sample sizes, weak controls, measurement biases, reproducibility concerns).\n\nFor each issue, explain:\n1. Recurrence: How it appears in multiple papers (cite sources).\n2. Impact: Why it matters for validity or generalizability.\n3. Solution: What best practices could address it in future research?",
-                tags: ["metodologia", "crítica", "ciência"]
-            },
-            {
-                id: 9,
-                title: "The Dialectical Lens",
-                category: "analysis",
-                description: "Constrói um debate entre dois acadêmicos imaginários sobre o texto.",
-                prompt: "From this text, construct a debate between two imaginary scholars who interpret this concept/argument in opposing ways.\n* Scholar A (Proponent): Supports the text's central thesis.\n* Scholar B (Critic): Challenges the thesis based on alternative interpretations or external logic.\n\nRequirement: What specific evidence/quotes from the book would each scholar use to support their view? List at least 3 citations for each side.",
-                tags: ["dialética", "filosofia", "debate"]
-            },
-            {
-                id: 10,
-                title: "Cultural Mirror",
-                category: "analysis",
-                description: "Recontextualiza a ideia central em um cenário cultural ou histórico diferente.",
-                prompt: "How would this idea [Insert Idea from text] look in a completely different cultural, historical, or philosophical context?\n* Challenge: Rewrite the core argument from the viewpoint of a specific alternative culture/philosophy.\n* Question: Would the argument still hold? Where would it fail?",
-                tags: ["sociologia", "criatividade", "cenários"]
-            },
+    // ==========================================
+    // Renderização de Prompts
+    // ==========================================
+    function getFilteredPrompts() {
+        let filtered = [...PROMPTS_DATA];
 
-            // --- STUDY & SYNTHESIS ---
-            {
-                id: 11,
-                title: "The 5 Essential Questions",
-                category: "study",
-                description: "Gera as 5 perguntas cruciais que resumem todo o material, e depois as responde.",
-                prompt: "Analyze all inputs and generate 5 essential questions that, when answered, capture the main points and core meaning of all inputs.\n\nCriteria for Questions:\na. Address the central theme or argument.\nb. Identify key supporting ideas.\nc. Highlight important facts or evidence.\nd. Reveal the author's purpose or perspective.\ne. Explore any significant implications or conclusions.\n\nOutput: After listing the questions, answer all of them one-by-one in detail using the source text.",
-                tags: ["resumo", "estudo", "provas"]
-            },
-            {
-                id: 12,
-                title: "Feynman Technique (Simplification)",
-                category: "study",
-                description: "Explica conceitos complexos como se fosse para uma criança de 12 anos.",
-                prompt: "Analyze [Concept X] from the sources using the Feynman Technique:\n1. Simple Explanation: Explain the concept in simple terms accessible to a 12-year-old.\n2. Gap Identification: Identify explicit knowledge gaps in the source text (what is not explained?).\n3. Analogies: Connect concepts through real-world analogies.\n4. Application: Create a real-world example for each key finding found in the text.",
-                tags: ["aprendizado", "simplificação", "feynman"]
-            },
-            {
-                id: 13,
-                title: "Anki Flashcards Generator",
-                category: "study",
-                description: "Cria flashcards formatados prontos para importação no Anki.",
-                prompt: "Thoroughly go through the provided sources and create comprehensive Anki flashcards.\nFormat:\nFront: [Question or Concept]\nBack:\n\nScaffold:\nQ: What is the primary function of the mitochondria described in Chapter 3? ; A: Energy production via ATP synthesis.\n\nInstruction: Divide the output by chapter or topic. Ensure coverage of all bolded terms in the source text.",
-                tags: ["anki", "flashcards", "memorização"]
-            },
-            {
-                id: 14,
-                title: "Content Strategy & SEO",
-                category: "study",
-                description: "Analisa concorrentes e cria estratégia de conteúdo baseada no texto.",
-                prompt: "Act as a content strategy expert. Based on the uploaded competitor articles, create a full analysis with the following structure:\n1. Quick Summary: 3 bullet points of the most important ideas.\n2. Target Audience Analysis: Who is this content written for? (e.g., beginners vs experts).\n3. Search Intent: When people search for this topic, what questions are they trying to answer?\n4. Content Gap: List 5 sub-topics that these competitors are missing but are relevant to the main theme.",
-                tags: ["marketing", "seo", "business"]
-            }
-        ];
+        // Filtro de busca
+        if (state.search) {
+            const q = state.search.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.content.toLowerCase().includes(q) ||
+                p.tags.some(t => t.toLowerCase().includes(q))
+            );
+        }
 
-        // --- RENDER LOGIC ---
-        let currentCategory = 'all';
-        let searchQuery = '';
+        // Filtro de modelo
+        if (state.model !== 'all') {
+            filtered = filtered.filter(p => p.model === state.model);
+        }
+
+        // Filtro de tags
+        if (state.tags.length > 0) {
+            filtered = filtered.filter(p =>
+                state.tags.every(t => p.tags.includes(t))
+            );
+        }
+
+        // Ordenação
+        if (state.sort === 'alpha') {
+            filtered.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'));
+        } else {
+            filtered.sort((a, b) => b.id - a.id);
+        }
+
+        return filtered;
+    }
+
+    function getTagColor(tag) {
+        const colors = {
+            'Autoconhecimento': 'bg-pco-lilac/30 text-pco-lilac-dark border-pco-lilac/50',
+            'Dicas': 'bg-pco-blue/30 text-pco-blue-dark border-pco-blue/50',
+            'Finanças': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            'Imagem': 'bg-pink-50 text-pink-700 border-pink-200',
+            'Marketing': 'bg-orange-50 text-orange-700 border-orange-200',
+            'Negócios': 'bg-pco-green/30 text-pco-green-dark border-pco-green/50',
+            'Organização': 'bg-sky-50 text-sky-700 border-sky-200',
+            'Pesquisa': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'Produtividade': 'bg-amber-50 text-amber-700 border-amber-200',
+            'Vibe Coding': 'bg-violet-50 text-violet-700 border-violet-200',
+        };
+        return colors[tag] || 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+
+    function renderPrompts() {
         const grid = document.getElementById('promptsGrid');
-        const searchInput = document.getElementById('searchInput');
-        const filters = document.getElementById('categoryFilters');
-        const emptyState = document.getElementById('emptyState');
-        const toast = document.getElementById('copyToast');
+        const noResults = document.getElementById('noResults');
+        const filtered = getFilteredPrompts();
+        const countEl = document.getElementById('filteredCount');
+        const totalEl = document.getElementById('promptCount');
 
-        function renderPrompts() {
+        totalEl.textContent = PROMPTS_DATA.length;
+
+        if (filtered.length === 0) {
             grid.innerHTML = '';
-            const filtered = promptsData.filter(item => {
-                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
-                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-                return matchesCategory && matchesSearch;
-            });
-
-            if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                filtered.forEach(item => {
-                    grid.appendChild(createCard(item));
-                });
-            }
+            noResults.classList.remove('hidden');
+            countEl.textContent = '(0 resultados)';
+            return;
         }
 
-        function createCard(item) {
-            const div = document.createElement('div');
-            div.className = 'prompt-card bg-white rounded-xl p-6 border border-gray-200 flex flex-col h-full';
-            
-            let badgeClass = 'bg-gray-100 text-gray-800';
-            let icon = 'fa-file-text';
-            if(item.category === 'audio') { badgeClass = 'bg-purple-100 text-purple-800'; icon = 'fa-headphones'; }
-            if(item.category === 'analysis') { badgeClass = 'bg-blue-100 text-blue-800'; icon = 'fa-brain'; }
-            if(item.category === 'study') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = 'fa-graduation-cap'; }
+        noResults.classList.add('hidden');
+        countEl.textContent = filtered.length < PROMPTS_DATA.length
+            ? `(${filtered.length} de ${PROMPTS_DATA.length})`
+            : '';
 
-            div.innerHTML = `
-                <div class="flex justify-between items-start mb-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass} capitalize">
-                        <i class="fa-solid ${icon} mr-1.5"></i> ${item.category}
-                    </span>
-                    <button onclick="copyToClipboard('${escapeJs(item.prompt)}')" class="text-gray-400 hover:text-amber-600 transition-colors" title="Copiar Prompt Completo">
-                        <i class="fa-regular fa-copy text-lg"></i>
-                    </button>
+        grid.innerHTML = filtered.map(prompt => `
+            <div class="card-hover bg-white rounded-xl border border-gray-200 flex flex-col cursor-pointer group" data-prompt-id="${prompt.id}" onclick="openModal(${prompt.id})">
+                <div class="p-5 pb-3">
+                    <h3 class="text-base font-semibold text-pco-text leading-snug line-clamp-2 group-hover:text-pco-lilac-dark transition-colors">${escapeHtml(prompt.title)}</h3>
+                    <p class="text-xs text-pco-text-muted mt-1">${escapeHtml(prompt.model)}</p>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">${item.title}</h3>
-                <p class="text-sm text-gray-600 mb-4 h-12 overflow-hidden text-ellipsis">${item.description}</p>
-                
-                <div class="mt-auto">
-                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 mb-4 relative group cursor-pointer" onclick="copyToClipboard('${escapeJs(item.prompt)}')">
-                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span class="text-xs bg-gray-800 text-white px-2 py-1 rounded">Copiar</span>
-                        </div>
-                        <p class="text-xs text-gray-500 font-mono italic leading-relaxed line-clamp-4 group-hover:text-gray-700 transition-colors">
-                            "${item.prompt}"
-                        </p>
+                <div class="px-5 flex-1">
+                    <div class="prompt-content text-sm text-pco-text/80 whitespace-pre-line leading-relaxed">${escapeHtml(prompt.content)}</div>
+                </div>
+                <div class="p-5 pt-3 mt-auto">
+                    <div class="flex flex-wrap gap-1.5">
+                        ${prompt.tags.map(tag => `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getTagColor(tag)}">${escapeHtml(tag)}</span>`).join('')}
                     </div>
-                    <button onclick="copyToClipboard('${escapeJs(item.prompt)}')" class="w-full mt-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-all flex items-center justify-center shadow-sm">
-                        <i class="fa-regular fa-copy mr-2"></i> Copiar Prompt Completo
-                    </button>
                 </div>
-            `;
-            return div;
-        }
+            </div>
+        `).join('');
+    }
 
-        // --- Standard Logic (Listeners, Chart, Utils) ---
-        function setupEventListeners() {
-            filters.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    filters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                    e.currentTarget.classList.add('active');
-                    currentCategory = e.currentTarget.dataset.category;
-                    renderPrompts();
-                });
-            });
-            searchInput.addEventListener('input', (e) => {
-                searchQuery = e.target.value.trim();
-                renderPrompts();
-            });
-        }
+    // ==========================================
+    // Modal
+    // ==========================================
+    function openModal(id) {
+        const prompt = PROMPTS_DATA.find(p => p.id === id);
+        if (!prompt) return;
 
-        // Fixed Copy Function for iFrame Support
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed'; // Prevent scrolling to bottom
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                toast.classList.remove('hidden');
-                toast.classList.add('copy-notification');
-                setTimeout(() => {
-                    toast.classList.remove('copy-notification');
-                    toast.classList.add('hidden');
-                }, 2000);
-            } catch (err) {
-                console.error('Falha ao copiar:', err);
-                alert('Não foi possível copiar automaticamente.');
-            } finally {
-                document.body.removeChild(textarea);
-            }
-        }
+        document.getElementById('modalTitle').textContent = prompt.title;
+        document.getElementById('modalModel').textContent = prompt.model;
+        document.getElementById('modalContent').textContent = prompt.content;
+        document.getElementById('modalTags').innerHTML = prompt.tags.map(tag =>
+            `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${getTagColor(tag)}">${escapeHtml(tag)}</span>`
+        ).join('');
 
-        function escapeJs(str) {
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
-        }
+        document.getElementById('modalCopy').onclick = () => copyToClipboard(prompt.content);
 
-        function renderChart() {
-            const ctx = document.getElementById('usageChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Fichamento & Análise', 'Estudo Ativo', 'Audio (Podcast)', 'Outros'],
-                    datasets: [{
-                        data: [35, 30, 25, 10], // Fixed numeric data
-                        backgroundColor: ['#93C5FD', '#FCD34D', '#C4B5FD', '#E5E7EB'], // Fixed colors
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right' } }
-                }
-            });
-        }
+        const modal = document.getElementById('promptModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderChart();
+    function closeModal() {
+        document.getElementById('promptModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // ==========================================
+    // Copiar para área de transferência
+    // ==========================================
+    async function copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast('Prompt copiado!');
+        } catch {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('Prompt copiado!');
+        }
+    }
+
+    function showToast(message) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'copy-toast flex items-center gap-2 bg-pco-green text-pco-text px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium';
+        toast.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            ${message}
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // ==========================================
+    // Event Listeners
+    // ==========================================
+    function setupEventListeners() {
+        // Busca
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            state.search = e.target.value;
             renderPrompts();
-            setupEventListeners();
+            toggleClearBtn();
         });
+
+        // Modelos
+        document.querySelectorAll('.model-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.model = btn.dataset.model;
+                document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPrompts();
+                toggleClearBtn();
+            });
+        });
+
+        // Tags
+        document.getElementById('tagFilters').addEventListener('click', (e) => {
+            const btn = e.target.closest('.tag-pill');
+            if (!btn) return;
+            const tag = btn.dataset.tag;
+            if (state.tags.includes(tag)) {
+                state.tags = state.tags.filter(t => t !== tag);
+                btn.classList.remove('active');
+            } else {
+                state.tags.push(tag);
+                btn.classList.add('active');
+            }
+            renderPrompts();
+            toggleClearBtn();
+        });
+
+        // Limpar filtros
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            state.search = '';
+            state.model = 'all';
+            state.tags = [];
+            document.getElementById('searchInput').value = '';
+            document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.model-btn[data-model="all"]').classList.add('active');
+            document.querySelectorAll('.tag-pill').forEach(b => b.classList.remove('active'));
+            renderPrompts();
+            toggleClearBtn();
+        });
+
+        // Ordenação
+        document.getElementById('sortNewest').addEventListener('click', () => {
+            state.sort = 'newest';
+            renderPrompts();
+        });
+        document.getElementById('sortAlpha').addEventListener('click', () => {
+            state.sort = 'alpha';
+            renderPrompts();
+        });
+
+        // Modal
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modalOverlay').addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Scroll to top
+        const scrollBtn = document.getElementById('scrollTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                scrollBtn.classList.add('visible');
+            } else {
+                scrollBtn.classList.remove('visible');
+            }
+        });
+        scrollBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Form de sugestão
+        document.getElementById('suggestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('Sugestão enviada! Obrigado.');
+            e.target.reset();
+        });
+    }
+
+    function toggleClearBtn() {
+        const btn = document.getElementById('clearFilters');
+        const hasFilters = state.search || state.model !== 'all' || state.tags.length > 0;
+        btn.classList.toggle('hidden', !hasFilters);
+    }
+
+    // ==========================================
+    // Utilitários
+    // ==========================================
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
     </script>
+
+
 </body>
 </html>
